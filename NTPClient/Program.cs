@@ -13,10 +13,18 @@ namespace NtpClient
         {
             using var client = new HttpClient();
 
-            var response = await client.GetAsync($"http://localhost:5000/NTP?clientSentTime={DateTime.Now.ToString()}");
+            /*var response = await client.GetAsync($"http://localhost:5000/NTP?clientSentTime={DateTime.Now.ToString()}");
             var content = await response.Content.ReadAsStringAsync();
 
-            var ntpData = Newtonsoft.Json.JsonConvert.DeserializeObject<NTPResponse>(content);
+            var ntpData = Newtonsoft.Json.JsonConvert.DeserializeObject<NTPResponse>(content);*/
+
+            var ntpData = new NTPResponse
+            {
+                ClientSentTime = DateTime.Now.AddSeconds(-4),
+                ServerReceivedTime = DateTime.Parse("1/10/2023 8:27:07 PM"),
+            };
+
+            ntpData.ServerSentTime = ntpData.ServerReceivedTime.AddSeconds(1);
 
             // calculate delay and offset
             var clientReceivedTime = DateTime.Now;
