@@ -28,30 +28,31 @@ namespace NtpClient
             // set local time using offset 
             var localTime = clientReceivedTime + offset;
 
-            Console.WriteLine("Before" + ": " + DateTime.Now);
             SetLocalTime(localTime);
-            SetSystemTimeZone(ntpResponse.ServerTimeZoneStandartName);
-            Console.WriteLine("After" + ": " + DateTime.Now);
+            Console.WriteLine("Time" + ": " + DateTime.Now);
+
+            SetSystemTimeZone(ntpResponse.ServerTimeZoneId);
+            Console.WriteLine(TimeZone.CurrentTimeZone.StandardName);
         }
 
-        static public void SetSystemTimeZone(string timeZoneDisplay)
+        static public void SetSystemTimeZone(string timeZoneId)
         {
-            timeZoneDisplay = "Eastern Standard Time";
             // Verify that the time zone exists
-            if (TimeZoneInfo.FindSystemTimeZoneById(timeZoneDisplay) == null)
+            if (TimeZoneInfo.FindSystemTimeZoneById(timeZoneId) == null)
             {
-                Console.WriteLine("Invalid time zone: " + timeZoneDisplay);
+                Console.WriteLine("Invalid time zone: " + timeZoneId);
                 return;
             }
 
             // Open the registry key
             using (RegistryKey key = Registry.LocalMachine.OpenSubKey(@"SYSTEM\CurrentControlSet\Control\TimeZoneInformation", true))
             {
-                key.SetValue("TimeZoneKeyName", timeZoneDisplay);
+                key.SetValue("TimeZoneKeyName", timeZoneId);
             }
 
             // Restart the time service to apply the changes
-            Process.Start("net.exe", "stop w32time && net start w32time");
+            var process = Process.Start("net.exe", "stop w32time && net start w32time");
+            process.WaitForExit();
         }
 
         static void SetLocalTime(DateTime newTime)
