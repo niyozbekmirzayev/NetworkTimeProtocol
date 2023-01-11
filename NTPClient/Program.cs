@@ -1,11 +1,11 @@
-﻿
-using NTPClient;
+﻿using NTPClient;
 using System;
 using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Microsoft.Win32;
 using System.Diagnostics;
+using System.Threading;
 
 namespace NtpClient
 {
@@ -20,22 +20,21 @@ namespace NtpClient
             var content = await response.Content.ReadAsStringAsync();
 
             var ntpResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<NTPResponse>(content);
-
-            // calculate delay and offset
+            
+            // Calculate delay and offset
             var clientReceivedTime = DateTime.Now;
-            var offset = ((ntpResponse.CurrentServerTime - clientSentDate) + (ntpResponse.CurrentServerTime - clientReceivedTime)) / 2;
+            var delay = (clientReceivedTime - clientSentDate) - (ntpResponse.ServerSentTime - ntpResponse.ServerReceivedTime);
+            var offset = ((ntpResponse.ServerReceivedTime - clientSentDate) + (ntpResponse.ServerSentTime - clientReceivedTime)) / 2;
 
-            // set local time using offset 
-            var localTime = clientReceivedTime + offset;
+            // Set local time using offset and delay 
+            var serverTime = DateTime.Now + offset + delay;
 
-            SetLocalTime(localTime);
-            Console.WriteLine("Time" + ": " + DateTime.Now);
-
+            SetLocalTime(serverTime);
+            //await SetSystemTimeZone(ntpResponse.ServerTimeZoneId);
             SetSystemTimeZone(ntpResponse.ServerTimeZoneId);
-            Console.WriteLine(TimeZone.CurrentTimeZone.StandardName);
         }
 
-        static public void SetSystemTimeZone(string timeZoneId)
+        /*static public async Task SetSystemTimeZone(string timeZoneId)
         {
             // Verify that the time zone exists
             if (TimeZoneInfo.FindSystemTimeZoneById(timeZoneId) == null)
@@ -52,7 +51,39 @@ namespace NtpClient
 
             // Restart the time service to apply the changes
             var process = Process.Start("net.exe", "stop w32time && net start w32time");
-            process.WaitForExit();
+            if(process == null) 
+            {
+                Console.WriteLine("No process started");
+            }
+
+            await process.WaitForExitAsync();
+        }*/
+
+        public static void SetSystemTimeZone(string timeZoneId)
+        {
+            if (TimeZoneInfo.FindSystemTimeZoneById(timeZoneId) == null)
+            {
+                Console.WriteLine("Invalid time zone: " + timeZoneId);
+                return;
+            }
+
+            var process = Process.Start(new ProcessStartInfo
+            {
+                FileName = "tzutil.exe",
+                Arguments = "/s \"" + timeZoneId + "\"",
+                UseShellExecute = false,
+                CreateNoWindow = true
+            });
+
+            if (process != null)
+            {
+                process.WaitForExit();
+                TimeZoneInfo.ClearCachedData();
+            }
+            else 
+            {
+                Console.WriteLine("No process created");
+            }
         }
 
         static void SetLocalTime(DateTime newTime)
