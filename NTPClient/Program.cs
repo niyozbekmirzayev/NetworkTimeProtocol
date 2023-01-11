@@ -1,8 +1,11 @@
 ﻿
+using NTPClient;
 using System;
 using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using Microsoft.Win32;
+using System.Diagnostics;
 
 namespace NtpClient
 {
@@ -13,21 +16,42 @@ namespace NtpClient
             using var client = new HttpClient();
 
             var clientSentDate = DateTime.Now;
-            var response = await client.GetAsync($"http://localhost:5000/NTP");
+            var response = await client.GetAsync($"http://192.168.40.120:5000/NTP");
             var content = await response.Content.ReadAsStringAsync();
 
-            var serverTime = Newtonsoft.Json.JsonConvert.DeserializeObject<DateTime>(content);
+            var ntpResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<NTPResponse>(content);
 
             // calculate delay and offset
             var clientReceivedTime = DateTime.Now;
-            var offset = ((serverTime - clientSentDate) + (serverTime - clientReceivedTime)) / 2;
+            var offset = ((ntpResponse.CurrentServerTime - clientSentDate) + (ntpResponse.CurrentServerTime - clientReceivedTime)) / 2;
 
             // set local time using offset 
             var localTime = clientReceivedTime + offset;
 
             Console.WriteLine("Before" + ": " + DateTime.Now);
             SetLocalTime(localTime);
-            Console.WriteLine("After" +": "+ localTime);
+            SetSystemTimeZone(ntpResponse.ServerTimeZoneStandartName);
+            Console.WriteLine("After" + ": " + DateTime.Now);
+        }
+
+        static public void SetSystemTimeZone(string timeZoneDisplay)
+        {
+            timeZoneDisplay = "Eastern Standard Time";
+            // Verify that the time zone exists
+            if (TimeZoneInfo.FindSystemTimeZoneById(timeZoneDisplay) == null)
+            {
+                Console.WriteLine("Invalid time zone: " + timeZoneDisplay);
+                return;
+            }
+
+            // Open the registry key
+            using (RegistryKey key = Registry.LocalMachine.OpenSubKey(@"SYSTEM\CurrentControlSet\Control\TimeZoneInformation", true))
+            {
+                key.SetValue("TimeZoneKeyName", timeZoneDisplay);
+            }
+
+            // Restart the time service to apply the changes
+            Process.Start("net.exe", "stop w32time && net start w32time");
         }
 
         static void SetLocalTime(DateTime newTime)
