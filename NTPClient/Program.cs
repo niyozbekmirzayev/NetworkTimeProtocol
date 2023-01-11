@@ -3,9 +3,7 @@ using System;
 using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
-using Microsoft.Win32;
 using System.Diagnostics;
-using System.Threading;
 
 namespace NtpClient
 {
@@ -30,34 +28,8 @@ namespace NtpClient
             var serverTime = DateTime.Now + offset + delay;
 
             SetLocalTime(serverTime);
-            //await SetSystemTimeZone(ntpResponse.ServerTimeZoneId);
             SetSystemTimeZone(ntpResponse.ServerTimeZoneId);
         }
-
-        /*static public async Task SetSystemTimeZone(string timeZoneId)
-        {
-            // Verify that the time zone exists
-            if (TimeZoneInfo.FindSystemTimeZoneById(timeZoneId) == null)
-            {
-                Console.WriteLine("Invalid time zone: " + timeZoneId);
-                return;
-            }
-
-            // Open the registry key
-            using (RegistryKey key = Registry.LocalMachine.OpenSubKey(@"SYSTEM\CurrentControlSet\Control\TimeZoneInformation", true))
-            {
-                key.SetValue("TimeZoneKeyName", timeZoneId);
-            }
-
-            // Restart the time service to apply the changes
-            var process = Process.Start("net.exe", "stop w32time && net start w32time");
-            if(process == null) 
-            {
-                Console.WriteLine("No process started");
-            }
-
-            await process.WaitForExitAsync();
-        }*/
 
         public static void SetSystemTimeZone(string timeZoneId)
         {
