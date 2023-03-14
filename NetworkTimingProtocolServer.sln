@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.4.33205.214
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NTPClient", "NTPClient\NTPClient.csproj", "{F3EC0E21-00BA-47AC-B652-BE39416F84BE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NTPClient", "NTPClient\NTPClient.csproj", "{F3EC0E21-00BA-47AC-B652-BE39416F84BE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NTPServer", "NTPServer\NTPServer.csproj", "{36E464B5-3409-483D-8E6A-91C5246525AF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{F3EC0E21-00BA-47AC-B652-BE39416F84BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F3EC0E21-00BA-47AC-B652-BE39416F84BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F3EC0E21-00BA-47AC-B652-BE39416F84BE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{36E464B5-3409-483D-8E6A-91C5246525AF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{36E464B5-3409-483D-8E6A-91C5246525AF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{36E464B5-3409-483D-8E6A-91C5246525AF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{36E464B5-3409-483D-8E6A-91C5246525AF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

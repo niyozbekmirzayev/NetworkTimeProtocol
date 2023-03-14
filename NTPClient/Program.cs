@@ -1,9 +1,9 @@
 ﻿using NTPClient;
 using System;
+using System.Diagnostics;
 using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
-using System.Diagnostics;
 
 namespace NtpClient
 {
@@ -14,11 +14,11 @@ namespace NtpClient
             using var client = new HttpClient();
 
             var clientSentDate = DateTime.Now;
-            var response = await client.GetAsync($"http://192.168.40.120:5000/NTP");
+            var response = await client.GetAsync($"http://localhost:5000/NTP");
             var content = await response.Content.ReadAsStringAsync();
 
             var ntpResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<NTPResponse>(content);
-            
+
             // Calculate delay and offset
             var clientReceivedTime = DateTime.Now;
             var delay = (clientReceivedTime - clientSentDate) - (ntpResponse.ServerSentTime - ntpResponse.ServerReceivedTime);
@@ -52,7 +52,7 @@ namespace NtpClient
                 process.WaitForExit();
                 TimeZoneInfo.ClearCachedData();
             }
-            else 
+            else
             {
                 Console.WriteLine("No process created");
             }
@@ -89,7 +89,7 @@ namespace NtpClient
             public ushort wSecond;
             public ushort wMilliseconds;
         }
-        
+
         // this method is used to change the local time
         [DllImport("kernel32.dll")]
         private static extern bool SetLocalTime(ref SYSTEMTIME systemTime);
